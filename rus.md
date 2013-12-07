@@ -1,4 +1,4 @@
-# 60 кадров в секунду с помощью pointer-events: none при прокрутке
+# 60 кадров в секунду с помощью pointer-events: none; при прокрутке
 
 Пол Льюис (Paul Lewis) не так давно опубликовал интересную заметку о том, как 
 [избежать ненужных перерисовок][1], отключив эффекты при наведении во время
@@ -20,18 +20,22 @@
 
 Позже я увидел гениальный твит от Кристиана Шэфера (Christian Schaefer).
 
-<blockquote class="twitter-tweet" lang="en"><p><a href="https://twitter.com/paul_irish">@paul_irish</a> Easy. Apply &quot;pointer-events: none&quot; to the &lt;body&gt; on scrollstart and remove it on scrollend. <a href="https://twitter.com/tabatkins">@tabatkins</a></p>&mdash; Christian Schaefer (@derSchepp) <a href="https://twitter.com/derSchepp/statuses/400394164350644224">November 12, 2013</a></blockquote>
+<blockquote class="twitter-tweet" lang="en">
+<p><a href="https://twitter.com/tabatkins">@tabatkins</a> It&#39;s complicated… common technique of toggling global class causes big recalc style. <a href="http://t.co/DwXXRZh7dC">http://t.co/DwXXRZh7dC</a> Anyway ignore me ;)</p>&mdash; Paul Irish (@paul_irish) <a href="https://twitter.com/paul_irish/statuses/400393234754449408">November 12, 2013</a>
+<p><a href="https://twitter.com/paul_irish">@paul_irish</a> Easy. Apply &quot;pointer-events: none&quot; to the &lt;body&gt; on scrollstart and remove it on scrollend. <a href="https://twitter.com/tabatkins">@tabatkins</a></p>&mdash; Christian Schaefer (@derSchepp) <a href="https://twitter.com/derSchepp/statuses/400394164350644224">November 12, 2013</a>
+</blockquote>
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-> **Пол Айриш (Paul Irish, [@paul_irish][3])**: [@tabatkins][6] Это сложно... 
+> **Пол Айриш (Paul Irish, [@paul_irish][3])**: [@tabatkins][6] Это сложно… 
 > Распространенная техника переключения глобального класса приводит к 
 > серьезному пересчету стилей [crbug.com/317007][4] В любом случае, не обращай
-> на меня внимания  
+> на меня внимания :)  
 > **Кристиан Шэфер ([@derSchepp][5])**: [@paul_irish][3] Все проще. Применяй 
-> "pointer-events: none" к &lt;body&gt; при scrollstart и удаляй его при 
+> `"pointer-events: none"` к `<body>` при scrollstart и удаляй его при 
 > scrollend [@tabatkins][6]
 
-## Всех спасет свойство `pointer-events`
+
+## Всех спасет свойство pointer-events
 
 Такой подход гораздо лучше, потому что позволяет элементу, у которого задано 
 свойство `pointer-events: none`, просто не реагировать на наведение на него 
@@ -43,27 +47,27 @@
 Мы получаем все преимущества оригинального подхода без проблем с 
 поддерживаемостью кода и специфичностью в CSS.
 
-  .disable-hover {
-    pointer-events: none;
-  }
+    .disable-hover {
+      pointer-events: none;
+    }
 
 Все, что нам надо сделать — это добавить класс `.disable-hover` к `body`, когда 
-пользователь начинает прокручивать страницу. Это позволит курсору "пролететь" 
+пользователь начинает прокручивать страницу. Это позволит курсору «пролететь» 
 над страницей, не вызывая у элементов реакции при наведении на них мышью.
 
-  var body = document.body,
-      timer;
-
-  window.addEventListener('scroll', function() {
-    clearTimeout(timer);
-    if(!body.classList.contains('disable-hover')) {
-      body.classList.add('disable-hover')
-    }
+    var body = document.body,
+        timer;
     
-    timer = setTimeout(function(){
-      body.classList.remove('disable-hover')
-    },500);
-  }, false);
+    window.addEventListener('scroll', function() {
+      clearTimeout(timer);
+      if(!body.classList.contains('disable-hover')) {
+        body.classList.add('disable-hover')
+      }
+      
+      timer = setTimeout(function(){
+        body.classList.remove('disable-hover')
+      }, 500);
+    }, false);
 
 Код достаточно прост — мы сбрасываем таймер (важно сделать это после 
 первоначальной прокрутки), проверяем, не установлен ли уже класс для элемента 
@@ -77,13 +81,14 @@
 `pointer-events: auto`, перекрывающее родительское значение и вызывающее 
 торможение при прокрутке.
 
-  .disable-hover,
-  .disable-hover * {
-    pointer-events: none !important;
-  }
 
 Решить эту проблему можно использовав селектор `*` и добавив `!important` к 
 значению свойства, чтобы отключить `pointer-events` для всех дочерних элементов.
+
+    .disable-hover,
+    .disable-hover * {
+      pointer-events: none !important;
+    }
 
 Взгляните сами на [тесткейс][2], открыв Timeline в инструментах разработчика, 
 чтобы увидеть прирост производительности, полученный с помощью этой простой 
